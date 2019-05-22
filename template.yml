@@ -1,0 +1,100 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: "AWS::Serverless-2016-10-31"
+Description: The infrastructure for the St. George App
+Resources:
+  CreatePerson:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      Handler: handler.savePerson
+      Runtime: nodejs8.10
+      CodeUri: .
+      Description: Receive a Person object from a PUT request, and store them in the Dynamo DB database, replacing the existing value if it already exists.
+      MemorySize: 512
+      Timeout: 10
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - "dynamodb:PutItem"
+              Resource:
+                "Fn::Join":
+                  - ""
+                  - - "arn:aws:dynamodb:"
+                    - Ref: "AWS::Region"
+                    - ":"
+                    - Ref: "AWS::AccountId"
+                    - ":table/People"
+      Events:
+        CreatePerson:
+          Type: Api
+          Properties:
+            Path: /person
+            Method: PUT
+  GetPerson:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      Handler: handler.getPerson
+      Runtime: nodejs8.10
+      CodeUri: .
+      Description: Receive a person Id from a GET request, and retrieve the specified key from the DynamoDB table if it exists.
+      MemorySize: 512
+      Timeout: 10
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - "dynamodb:GetItem"
+              Resource:
+                "Fn::Join":
+                  - ""
+                  - - "arn:aws:dynamodb:"
+                    - Ref: "AWS::Region"
+                    - ":"
+                    - Ref: "AWS::AccountId"
+                    - ":table/People"
+      Events:
+        GetPerson:
+          Type: Api
+          Properties:
+            Path: /person/{firstAndLastName}
+            Method: GET
+  PeopleTable:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      TableName: People
+      AttributeDefinitions:
+        - AttributeName: firstAndLastName
+          AttributeType: S
+      KeySchema:
+        - AttributeName: firstAndLastName
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+  ReactS3Bucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: "st-george-app-testing-bucket"
+      AccessControl: PublicRead # Make this bucket able to be read publicly (Static Web Hosting)
+      WebsiteConfiguration: # Set the index and error documents for the site
+        IndexDocument: index.html
+        ErrorDocument: error.html
+  BucketPolicy:
+    Type: AWS::S3::BucketPolicy # Give the bucket public access for anyone to to get objects from it (So it can be viewed)
+    Properties:
+      PolicyDocument:
+        Id: MyPolicy
+        Version: 2012-10-17
+        Statement:
+          - Sid: PublicReadForGetBucketObjects
+            Effect: Allow
+            Principal: "*"
+            Action: "s3:GetObject"
+            Resource: !Join
+              - ""
+              - - "arn:aws:s3:::"
+                - !Ref ReactS3Bucket
+                - /*
+      Bucket: !Ref ReactS3Bucket
