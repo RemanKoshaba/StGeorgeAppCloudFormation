@@ -28,6 +28,6 @@ echo 'Packaging stack...'
 
 package $CF_BUCKET_NAME
 
-echo 'Deploying Stack'
+echo 'Deploying Stack...'
 
 deploy $STACK_NAME

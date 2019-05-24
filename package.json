@@ -1,0 +1,20 @@
+{
+  "name": "stgeorgeappcloudformation",
+  "version": "1.0.0",
+  "description": "Cloud Formation and Lambdas for St George App",
+  "private": true,
+  "main": "handler.js",
+  "dependencies": {
+    "jsonschema": "^1.2.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/josephalan/StGeorgeAppCloudFormation.git"
+  },
+  "author": "Joseph Alan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/josephalan/StGeorgeAppCloudFormation/issues"
+  },
+  "homepage": "https://github.com/josephalan/StGeorgeAppCloudFormation#readme"
+}
